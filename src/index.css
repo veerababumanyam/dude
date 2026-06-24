@@ -1,0 +1,46 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,100..900;1,9..144,100..900&family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:ital,wght@0,400..700;1,400..700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Fraunces", ui-serif, Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-brand-50: #FFF3F0;
+  --color-brand-500: #C5938F;
+  --color-brand-700: #9C5354;
+  --color-brand-800: #803F42;
+  --color-accent-600: #2C7F77;
+  
+  --color-neutral-50: #FDFAF8;
+  --color-neutral-600: #766F6C;
+  --color-neutral-900: #2F2B29;
+  --color-neutral-950: #1A1615;
+
+  --color-status-success: #258846;
+  --color-status-warning: #CE8D00;
+  --color-status-error: #C13B35;
+  --color-status-info: #007DAB;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-neutral-50);
+    color: var(--color-neutral-900);
+  }
+}
+
+@layer utilities {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: var(--color-brand-500);
+    opacity: 0.5;
+    border-radius: 10px;
+  }
+}
