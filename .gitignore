@@ -6,3 +6,7 @@ coverage/
 *.log
 .env*
 !.env.example
+
+# Local tooling / CI — not for the shared repo
+.claude/
+.github/
