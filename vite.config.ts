@@ -5,7 +5,11 @@ import {defineConfig} from 'vite';
 import {VitePWA} from 'vite-plugin-pwa';
 
 export default defineConfig(() => {
+  // Served from a subpath on GitHub Pages (https://<user>.github.io/dude/).
+  // The deploy workflow sets VITE_BASE=/dude/; local dev/preview stays at "/".
+  const base = process.env.VITE_BASE || '/';
   return {
+    base,
     plugins: [
       react(),
       tailwindcss(),
@@ -20,7 +24,8 @@ export default defineConfig(() => {
           theme_color: '#9C5354',
           background_color: '#FDFAF8',
           display: 'standalone',
-          start_url: '/',
+          start_url: base,
+          scope: base,
           icons: [
             {src: 'DudeLogo.png', sizes: '512x512', type: 'image/png'},
             {src: 'DudeLogo.png', sizes: '192x192', type: 'image/png'},
@@ -36,7 +41,7 @@ export default defineConfig(() => {
           // App shell + assets cached for offline use; data lives in IndexedDB.
           globPatterns: ['**/*.{js,css,html,png,svg,woff2}'],
           maximumFileSizeToCacheInBytes: 4 * 1024 * 1024,
-          navigateFallback: '/index.html',
+          navigateFallback: `${base}index.html`,
         },
       }),
     ],
