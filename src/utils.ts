@@ -5,13 +5,14 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// Currency is fixed to Indian Rupees (INR) for the India market.
 export function formatCurrency(amount: number | string | undefined | null) {
   if (amount == null) return "";
-  const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+  const num = typeof amount === "string" ? parseFloat(amount) : amount;
   if (isNaN(num)) return "";
-  return new Intl.NumberFormat('en-IN', {
-    style: 'currency',
-    currency: 'INR',
-    maximumFractionDigits: 0
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
   }).format(num);
 }

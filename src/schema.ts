@@ -1,111 +1,146 @@
 import { z } from "zod";
 
-export const siteFormSchema = z.object({
-  // Section A
-  serialNo: z.string().optional(),
-  siteName: z.string().min(1, "Site name is required").max(100, "Maximum 100 characters allowed"),
-  location: z.string().min(1, "Location is required"),
-  unitType: z.string().min(1, "Unit type is required"),
-  unitOther: z.string().optional(),
-  overallSqft: z.number().min(0, "Cannot be negative"),
-  clubhouseSqft: z.number().min(0, "Cannot be negative"),
+/** Empty string / null / NaN → undefined, so empty inputs read as "missing". */
+const emptyToUndefined = (v: unknown) =>
+  v === "" || v === null || (typeof v === "number" && Number.isNaN(v))
+    ? undefined
+    : v;
 
-  // Section B - Services Matrix
-  services: z.array(z.string()),
-  
-  // Service Sub-options
-  housekeeping: z.object({
-    hkExecutive: z.number().min(0).optional(),
-    hkSupervisor: z.number().min(0).optional(),
-    hkStaff: z.number().min(0).optional(),
-  }).optional(),
+/** Required, non-negative number with a friendly "required" message. */
+const requiredNumber = (message: string) =>
+  z.preprocess(
+    emptyToUndefined,
+    z.number({ error: message }).min(0, "Cannot be negative"),
+  );
 
-  security: z.object({
-    so: z.object({ qty: z.number().min(0).optional(), gender: z.string().optional(), shift: z.string().optional() }),
-    aso: z.object({ qty: z.number().min(0).optional(), gender: z.string().optional(), shift: z.string().optional() }),
-    supervisor: z.object({ qty: z.number().min(0).optional(), gender: z.string().optional(), shift: z.string().optional() }),
-    guards: z.object({ qty: z.number().min(0).optional(), gender: z.string().optional(), shift: z.string().optional() }),
-  }).optional(),
+/** Required positive number (>= 1). */
+const requiredPositive = (message: string) =>
+  z.preprocess(emptyToUndefined, z.number({ error: message }).min(1, message));
 
-  mep: z.object({
-    fm: z.number().min(0).optional(),
-    afm: z.number().min(0).optional(),
-    executive: z.number().min(0).optional(),
-    helpdesk: z.number().min(0).optional(),
-    techSupervisor: z.number().min(0).optional(),
-    electricians: z.number().min(0).optional(),
-    plumbers: z.number().min(0).optional(),
-    mst: z.number().min(0).optional(),
-    mason: z.number().min(0).optional(),
-    carpenter: z.number().min(0).optional(),
-    painter: z.number().min(0).optional(),
-    stpOperator: z.number().min(0).optional(),
-    wtpOperator: z.number().min(0).optional(),
-    poolOperator: z.number().min(0).optional(),
-    cctvOperator: z.number().min(0).optional(),
-    fireSafetyOperator: z.number().min(0).optional(),
-    accountant: z.number().min(0).optional(),
-  }).optional(),
+/** Optional, non-negative number. */
+const optionalNumber = z.preprocess(
+  emptyToUndefined,
+  z.number().min(0, "Cannot be negative").optional(),
+);
 
-  horticulture: z.object({
-    gardenerSupervisor: z.object({ qty: z.number().min(0).optional(), gender: z.string().optional() }),
-    gardeners: z.object({ qty: z.number().min(0).optional(), gender: z.string().optional() }),
-  }).optional(),
-
-  coaches: z.object({
-    gym: z.number().min(0).optional(),
-    pool: z.number().min(0).optional(),
-    yoga: z.number().min(0).optional(),
-    badminton: z.number().min(0).optional(),
-  }).optional(),
-
-  pestControl: z.boolean().optional(),
-
-  // Section C
-  pocType: z.string().min(1, "Point of contact is required"),
-  pocOther: z.string().optional(),
-  handoverType: z.string().min(1, "Handover information is required"),
-  handoverOther: z.string().optional(),
-  tenureValue: z.number().min(1, "Tenure is required"),
-  tenureUnit: z.string().min(1, "Tenure unit is required"),
-  handoverMoment: z.string().min(1, "Handover date/time is required"),
-  handoverNotes: z.string().optional(),
-
-  // Section D
-  salaries: z.record(z.string(), z.number().min(0).optional()).optional(),
-  esiPf: z.string().min(1, "ESI & PF status is required"),
-  status: z.string().min(1, "Status is required"),
-  priority: z.enum(['High', 'Medium', 'Low']).optional(),
-  timings: z.array(z.string()).min(1, "Select at least one timing"),
-  timingNotes: z.string().optional(),
-  quotationValue: z.number().min(0, "Cannot be negative"),
-
-  // Metadata
-  createdAt: z.string().optional(),
-}).refine(data => {
-  if (data.unitType === "Other" && !data.unitOther) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Specify the unit type",
-  path: ["unitOther"]
-}).refine(data => {
-  if (data.pocType === "Others" && !data.pocOther) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Specify point of contact",
-  path: ["pocOther"]
-}).refine(data => {
-  if (data.handoverType === "Others" && !data.handoverOther) {
-    return false;
-  }
-  return true;
-}, {
-  message: "Specify handover information",
-  path: ["handoverOther"]
+const qtyWithModifiers = z.object({
+  qty: optionalNumber,
+  gender: z.string().optional(),
+  shift: z.string().optional(),
 });
+
+const qtyWithGender = z.object({
+  qty: optionalNumber,
+  gender: z.string().optional(),
+});
+
+export const siteFormSchema = z
+  .object({
+    // Section A
+    serialNo: z.string().optional(),
+    siteName: z
+      .string()
+      .min(1, "Site name is required")
+      .max(100, "Maximum 100 characters allowed"),
+    location: z.string().min(1, "Location is required"),
+    unitType: z.string().min(1, "Unit type is required"),
+    unitOther: z.string().optional(),
+    overallSqft: requiredNumber("Overall area is required"),
+    clubhouseSqft: requiredNumber("Clubhouse area is required"),
+
+    // Section B - Services Matrix
+    services: z.array(z.string()),
+
+    housekeeping: z
+      .object({
+        hkExecutive: optionalNumber,
+        hkSupervisor: optionalNumber,
+        hkStaff: optionalNumber,
+      })
+      .optional(),
+
+    security: z
+      .object({
+        so: qtyWithModifiers,
+        aso: qtyWithModifiers,
+        supervisor: qtyWithModifiers,
+        guards: qtyWithModifiers,
+      })
+      .optional(),
+
+    mep: z
+      .object({
+        fm: optionalNumber,
+        afm: optionalNumber,
+        executive: optionalNumber,
+        helpdesk: optionalNumber,
+        techSupervisor: optionalNumber,
+        electricians: optionalNumber,
+        plumbers: optionalNumber,
+        mst: optionalNumber,
+        mason: optionalNumber,
+        carpenter: optionalNumber,
+        painter: optionalNumber,
+        stpOperator: optionalNumber,
+        wtpOperator: optionalNumber,
+        poolOperator: optionalNumber,
+        cctvOperator: optionalNumber,
+        fireSafetyOperator: optionalNumber,
+        accountant: optionalNumber,
+      })
+      .optional(),
+
+    horticulture: z
+      .object({
+        gardenerSupervisor: qtyWithGender,
+        gardeners: qtyWithGender,
+      })
+      .optional(),
+
+    coaches: z
+      .object({
+        gym: optionalNumber,
+        pool: optionalNumber,
+        yoga: optionalNumber,
+        badminton: optionalNumber,
+      })
+      .optional(),
+
+    pestControl: z.boolean().optional(),
+
+    // Section C
+    pocType: z.string().min(1, "Point of contact is required"),
+    pocOther: z.string().optional(),
+    handoverType: z.string().min(1, "Handover information is required"),
+    handoverOther: z.string().optional(),
+    tenureValue: requiredPositive("Tenure is required"),
+    tenureUnit: z.string().min(1, "Tenure unit is required"),
+    handoverMoment: z.string().min(1, "Handover date/time is required"),
+    handoverNotes: z.string().optional(),
+
+    // Section D
+    salaries: z.record(z.string(), optionalNumber).optional(),
+    esiPf: z.string().min(1, "ESI & PF status is required"),
+    status: z.string().min(1, "Status is required"),
+    priority: z.enum(["High", "Medium", "Low"]).optional(),
+    timings: z.array(z.string()).min(1, "Select at least one timing"),
+    timingNotes: z.string().optional(),
+    quotationValue: requiredNumber("Quotation value is required"),
+
+    // Metadata
+    createdAt: z.string().optional(),
+  })
+  .refine((data) => !(data.unitType === "Other" && !data.unitOther), {
+    message: "Specify the unit type",
+    path: ["unitOther"],
+  })
+  .refine((data) => !(data.pocType === "Others" && !data.pocOther), {
+    message: "Specify point of contact",
+    path: ["pocOther"],
+  })
+  .refine((data) => !(data.handoverType === "Others" && !data.handoverOther), {
+    message: "Specify handover information",
+    path: ["handoverOther"],
+  });
 
 export type SiteFormData = z.infer<typeof siteFormSchema>;
