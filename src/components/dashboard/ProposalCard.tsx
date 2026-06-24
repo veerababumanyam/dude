@@ -87,7 +87,7 @@ export function ProposalCard({
     setMenuOpen(false);
     const id = toast.loading(t("modals.pdfGenerating"));
     try {
-      await downloadProposalPdf(sub, statuses, t);
+      await downloadProposalPdf(sub, statuses);
       toast.dismiss(id);
     } catch (e) {
       console.error("PDF export failed", e);

@@ -196,7 +196,7 @@ export default function App() {
     });
     const toastId = toast.loading(t("shell.emailPreparing"));
     try {
-      const blob = await proposalPdfBlob(sub, statuses, t);
+      const blob = await proposalPdfBlob(sub, statuses);
       const file = new File([blob], pdfFilename(sub), {
         type: "application/pdf",
       });

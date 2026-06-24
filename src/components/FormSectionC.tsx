@@ -124,13 +124,13 @@ export function FormSectionC() {
                 placeholder="1"
                 {...register("tenureValue", { valueAsNumber: true })}
                 error={!!errors.tenureValue}
-                className="font-mono text-center rounded-r-none z-10"
+                className="flex-1 min-w-0 font-mono text-center rounded-r-none z-10"
               />
               <Select
                 id="tenureUnit"
                 {...register("tenureUnit")}
                 error={!!errors.tenureUnit}
-                className="rounded-l-none -ml-px w-1/2 bg-neutral-50"
+                className="w-32 shrink-0 rounded-l-none -ml-px bg-neutral-50"
               >
                 <option value="Months">{t("forms.months")}</option>
                 <option value="Years">{t("forms.years")}</option>

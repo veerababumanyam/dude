@@ -43,7 +43,7 @@ export function DetailsModal({
     if (pdfLoading) return;
     setPdfLoading(true);
     try {
-      await downloadProposalPdf(proposal, statuses, t);
+      await downloadProposalPdf(proposal, statuses);
     } catch (e) {
       console.error("PDF export failed", e);
       toast.error(t("modals.pdfError"));
