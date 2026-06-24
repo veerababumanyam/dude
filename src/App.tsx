@@ -21,7 +21,6 @@ import { useTranslation } from "./i18n/context";
 
 import { Sidebar } from "./components/Sidebar";
 import { LoginScreen } from "./components/LoginScreen";
-import { ProfileSwitcher } from "./components/ProfileSwitcher";
 import { MobileNavMenu } from "./components/MobileNavMenu";
 import { NotificationBell } from "./components/NotificationBell";
 import { Dashboard } from "./components/dashboard/Dashboard";
@@ -298,12 +297,6 @@ export default function App() {
               onCreate={handleCreateNew}
               onArchive={() => setView("archive")}
               onSettings={() => setShowSettings(true)}
-            />
-            <ProfileSwitcher
-              profile={profile}
-              profiles={profiles}
-              onSelect={selectProfile}
-              variant="compact"
             />
           </div>
         </header>
